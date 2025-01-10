@@ -1,6 +1,35 @@
 <?php
 $message = '';
 $status = '';
+$action = '';
+$empId = '';
+// view and edit data
+if (isset($_GET['empId']) && $_GET['action'] == 'view') {
+
+    global $wpdb;
+
+    // Action = edit
+    if ($_GET['action'] == 'edit') {
+        $action = 'edit';
+        $empId = $_GET['empId'];
+    }
+    // Action = view
+    if ($_GET['action'] == 'view') {
+        $action = 'view';
+        $empId = $_GET['empId'];
+    }
+    // single employee data
+    $employee = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}ems_form_data WHERE id = %d",
+            $empId
+        ),
+        ARRAY_A
+    );
+    print_r($employee);
+}
+
+// save data
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     global $wpdb;
 
@@ -44,36 +73,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     <form action="<?php echo esc_url(admin_url('admin.php?page=Employee-Management-System')); ?>" method="post" id="employeeForm">
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Enter employee name" required>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter employee name" value="<?php echo esc_attr($employee['name'] ?? ''); ?>" required>
         </div>
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="Enter employee email" required>
+            <input type="email" class="form-control" id="email" name="email" placeholder="Enter employee email" required value="<?php echo esc_attr($employee['email'] ?? ''); ?>">
         </div>
         <div class="mb-3">
             <label for="phone" class="form-label">Phone Number</label>
-            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number" required>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number" required value="<?php echo esc_attr($employee['phoneNO'] ?? ''); ?>">
         </div>
         <div class="mb-3">
             <label class="form-label">Gender</label>
             <div>
+                <?php $selectedGender = $employee['gender'] ?? ''; ?>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="gender" id="male" value="Male" required>
+                    <input class="form-check-input" type="radio" name="gender" id="male" value="Male"
+                        <?php echo $selectedGender === 'Male' ? 'checked' : ''; ?> <?php echo $action === 'view' ? 'disabled' : ''; ?>>
                     <label class="form-check-label" for="male">Male</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="gender" id="female" value="Female">
+                    <input class="form-check-input" type="radio" name="gender" id="female" value="Female"
+                        <?php echo $selectedGender === 'Female' ? 'checked' : ''; ?> <?php echo $action === 'view' ? 'disabled' : ''; ?>>
                     <label class="form-check-label" for="female">Female</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="gender" id="other" value="Other">
+                    <input class="form-check-input" type="radio" name="gender" id="other" value="Other"
+                        <?php echo $selectedGender === 'Other' ? 'checked' : ''; ?> <?php echo $action === 'view' ? 'disabled' : ''; ?>>
                     <label class="form-check-label" for="other">Other</label>
                 </div>
             </div>
         </div>
         <div class="mb-3">
             <label for="designation" class="form-label">Designation</label>
-            <input type="text" class="form-control" id="designation" name="designation" placeholder="Enter designation" required>
+            <input type="text" class="form-control" id="designation" name="designation" placeholder="Enter designation" required value="<?php echo esc_attr($employee['designation'] ?? ''); ?>">
         </div>
         <button type="submit" class="btn btn-primary" name="submit">Submit</button>
     </form>
